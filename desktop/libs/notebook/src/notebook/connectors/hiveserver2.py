@@ -270,7 +270,7 @@ class HS2Api(Api):
     operation = db.get_operation_status(handle)
     status = HiveServerQueryHistory.STATE_MAP[operation.operationState]
 
-    if status.index in (QueryHistory.STATE.failed.index, QueryHistory.STATE.expired.index):
+    if status.index in (QueryHistory.STATE.failed, QueryHistory.STATE.expired):
       if operation.errorMessage and 'transition from CANCELED to ERROR' in operation.errorMessage: # Hive case on canceled query
         raise QueryExpired()
       elif  operation.errorMessage and re.search('Cannot validate serde: org.apache.hive.hcatalog.data.JsonSerDe', str(operation.errorMessage)):
@@ -278,7 +278,7 @@ class HS2Api(Api):
       else:
         raise QueryError(operation.errorMessage)
 
-    response['status'] = 'running' if status.index in (QueryHistory.STATE.running.index, QueryHistory.STATE.submitted.index) else 'available'
+    response['status'] = 'running' if status.index in (QueryHistory.STATE.running, QueryHistory.STATE.submitted) else 'available'
 
     return response
 

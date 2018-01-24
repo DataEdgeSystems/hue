@@ -154,28 +154,28 @@ class QueryHistory(models.Model):
       return is_statement_finished
 
   def is_running(self):
-    return self.last_state in (QueryHistory.STATE.running.value, QueryHistory.STATE.submitted.value)
+    return self.last_state in (QueryHistory.STATE.running, QueryHistory.STATE.submitted)
 
   def is_success(self):
-    return self.last_state in (QueryHistory.STATE.available.value,)
+    return self.last_state in (QueryHistory.STATE.available,)
 
   def is_failure(self):
-    return self.last_state in (QueryHistory.STATE.expired.value, QueryHistory.STATE.failed.value)
+    return self.last_state in (QueryHistory.STATE.expired, QueryHistory.STATE.failed)
 
   def is_expired(self):
-    return self.last_state in (QueryHistory.STATE.expired.value,)
+    return self.last_state in (QueryHistory.STATE.expired,)
 
   def set_to_running(self):
-    self.last_state = QueryHistory.STATE.running.value
+    self.last_state = QueryHistory.STATE.running
 
   def set_to_failed(self):
-    self.last_state = QueryHistory.STATE.failed.value
+    self.last_state = QueryHistory.STATE.failed
 
   def set_to_available(self):
-    self.last_state = QueryHistory.STATE.available.value
+    self.last_state = QueryHistory.STATE.available
 
   def set_to_expired(self):
-    self.last_state = QueryHistory.STATE.expired.value
+    self.last_state = QueryHistory.STATE.expired
 
   def save(self, *args, **kwargs):
     """
@@ -245,7 +245,7 @@ class HiveServerQueryHistory(QueryHistory):
                                  modified_row_count=self.modified_row_count)
 
   def save_state(self, new_state):
-    self.last_state = new_state.index
+    self.last_state = new_state
     self.save()
 
   @classmethod
