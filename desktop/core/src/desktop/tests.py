@@ -30,6 +30,7 @@ import tempfile
 from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 from nose.tools import assert_true, assert_false, assert_equal, assert_not_equal, assert_raises, nottest
+from django.core.paginator import Paginator
 from django.conf.urls import url
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -51,7 +52,6 @@ import desktop.views as views
 from desktop.appmanager import DESKTOP_APPS
 from desktop.lib import django_mako
 from desktop.lib.django_test_util import make_logged_in_client
-from desktop.lib.paginator import Paginator
 from desktop.lib.conf import validate_path
 from desktop.lib.django_util import TruncatingModel
 from desktop.lib.exceptions_renderable import PopupException
@@ -352,28 +352,18 @@ def test_paginator():
 
   # First page 1-20
   obj = range(20)
-  pgn = Paginator(obj, per_page=20, total=25)
+  pgn = Paginator(obj, per_page=20)
   assert_page(pgn.page(1), obj, 1, 20)
-
-  # Second page 21-25
-  obj = range(5)
-  pgn = Paginator(obj, per_page=20, total=25)
-  assert_page(pgn.page(2), obj, 21, 25)
 
   # Handle extra data on first page (22 items on a 20-page)
   obj = range(22)
-  pgn = Paginator(obj, per_page=20, total=25)
+  pgn = Paginator(obj, per_page=20)
   assert_page(pgn.page(1), range(20), 1, 20)
-
-  # Handle extra data on second page (22 items on a 20-page)
-  obj = range(22)
-  pgn = Paginator(obj, per_page=20, total=25)
-  assert_page(pgn.page(2), range(5), 21, 25)
 
   # Handle total < len(obj). Only works for QuerySet.
   obj = query.QuerySet()
   obj._result_cache = range(10)
-  pgn = Paginator(obj, per_page=10, total=9)
+  pgn = Paginator(obj, per_page=10)
   assert_page(pgn.page(1), range(10), 1, 10)
 
   # Still works with a normal complete list

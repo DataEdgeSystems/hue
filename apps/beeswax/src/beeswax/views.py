@@ -22,6 +22,7 @@ import sys
 import time
 
 from django import forms
+from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -34,7 +35,7 @@ from django.urls import reverse
 from desktop.appmanager import get_apps_dict
 from desktop.conf import ENABLE_DOWNLOAD, REDIRECT_WHITELIST
 from desktop.context_processors import get_app_name
-from desktop.lib.paginator import Paginator
+
 from desktop.lib.django_util import JsonResponse
 from desktop.lib.django_util import copy_query_dict, format_preserving_redirect, render
 from desktop.lib.django_util import login_notrequired, get_desktop_uri_prefix
@@ -1017,7 +1018,7 @@ def _list_query_history(user, querydict, page_size, prefix=""):
   if pagenum < 1:
     pagenum = 1
   db_queryset = db_queryset[ page_size * (pagenum - 1) : page_size * pagenum ]
-  paginator = Paginator(db_queryset, page_size, total=total_count)
+  paginator = Paginator(db_queryset, page_size)
   page = paginator.page(pagenum)
 
   # We do slicing ourselves, rather than letting the Paginator handle it, in order to

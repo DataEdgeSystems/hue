@@ -18,10 +18,10 @@
 import logging
 
 from datetime import datetime, timedelta
+from django.core.paginator import Paginator
 from django.utils.translation import ugettext as _
 
 from desktop.lib.exceptions_renderable import PopupException
-from desktop.lib.paginator import Paginator
 from desktop.lib.rest.http_client import RestException
 
 from hadoop.cluster import rm_ha
