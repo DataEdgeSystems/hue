@@ -390,15 +390,15 @@ def listdir(request, path):
     data['files'] = [_massage_stats(request, stat_absolute_path(path, stat)) for stat in stats]
     return render('listdir.mako', request, data)
 
-def _massage_page(page):
+def _massage_page(page, paginator):
     return {
         'number': page.number,
-        'num_pages': page.num_pages(),
+        'num_pages': paginator.num_pages,
         'previous_page_number': page.previous_page_number(),
         'next_page_number': page.next_page_number(),
         'start_index': page.start_index(),
         'end_index': page.end_index(),
-        'total_count': page.total_count()
+        'total_count': paginator.count
     }
 
 def listdir_paged(request, path):
@@ -457,10 +457,12 @@ def listdir_paged(request, path):
 
     # Do pagination
     try:
-      page = paginator.Paginator(all_stats, pagesize).page(pagenum)
+      paginator = paginator.Paginator(all_stats, pagesize)
+      page = paginator.page(pagenum)
       shown_stats = page.object_list
     except EmptyPage:
       logger.warn("No results found for requested page.")
+      paginator = None
       page = None
       shown_stats = []
 
@@ -497,6 +499,7 @@ def listdir_paged(request, path):
         'is_trash_enabled': is_trash_enabled,
         'files': page.object_list if page else [],
         'page': _massage_page(page) if page else {},
+        'paginator': paginator,
         'pagesize': pagesize,
         'home_directory': request.fs.isdir(home_dir_path) and home_dir_path or None,
         'descending': descending_param,

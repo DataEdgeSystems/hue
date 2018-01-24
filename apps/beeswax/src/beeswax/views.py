@@ -230,10 +230,11 @@ def list_designs(request):
   if search_filter is not None:
     querydict_query[ prefix + 'text' ] = search_filter
 
-  page, filter_params = _list_designs(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
+  paginator, page, filter_params = _list_designs(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
 
   return render('list_designs.mako', request, {
     'page': page,
+    'paginator': paginator,
     'filter_params': filter_params,
     'prefix': prefix,
     'user': request.user,
@@ -257,10 +258,11 @@ def list_trashed_designs(request):
   if search_filter is not None:
     querydict_query[ prefix + 'text' ] = search_filter
 
-  page, filter_params = _list_designs(user, querydict_query, DEFAULT_PAGE_SIZE, prefix, is_trashed=True)
+  paginator, page, filter_params = _list_designs(user, querydict_query, DEFAULT_PAGE_SIZE, prefix, is_trashed=True)
 
   return render('list_trashed_designs.mako', request, {
     'page': page,
+    'paginator': paginator,
     'filter_params': filter_params,
     'prefix': prefix,
     'user': request.user,
@@ -285,7 +287,7 @@ def my_queries(request):
   querydict_history[ prefix + 'user' ] = request.user
   querydict_history[ prefix + 'type' ] = app_name
 
-  hist_page, hist_filter = _list_query_history(request.user,
+  hist_paginator, hist_page, hist_filter = _list_query_history(request.user,
                                                querydict_history,
                                                DEFAULT_PAGE_SIZE,
                                                prefix)
@@ -296,7 +298,7 @@ def my_queries(request):
   querydict_query[ prefix + 'user' ] = request.user
   querydict_query[ prefix + 'type' ] = app_name
 
-  query_page, query_filter = _list_designs(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
+  query_paginator, query_page, query_filter = _list_designs(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
 
   filter_params = hist_filter
   filter_params.update(query_filter)
@@ -304,7 +306,9 @@ def my_queries(request):
   return render('my_queries.mako', request, {
     'request': request,
     'h_page': hist_page,
+    'h_paginator': hist_paginator,
     'q_page': query_page,
+    'q_paginator': query_paginator,
     'filter_params': filter_params,
     'designs_json': json.dumps([query.id for query in query_page.object_list])
   })
@@ -337,7 +341,7 @@ def list_query_history(request):
   app_name = get_app_name(request)
   querydict_query[prefix + 'type'] = app_name
 
-  page, filter_params = _list_query_history(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
+  paginator, page, filter_params = _list_query_history(request.user, querydict_query, DEFAULT_PAGE_SIZE, prefix)
 
   filter = request.GET.get(prefix + 'search') and request.GET.get(prefix + 'search') or ''
 
@@ -351,6 +355,7 @@ def list_query_history(request):
   return render('list_history.mako', request, {
     'request': request,
     'page': page,
+    'paginator': paginator,
     'filter_params': filter_params,
     'share_queries': share_queries,
     'prefix': prefix,
@@ -858,7 +863,7 @@ def _list_designs(user, querydict, page_size, prefix="", is_trashed=False):
   keys_to_copy = [ prefix + key for key in ('user', 'type', 'sort', 'text') ]
   filter_params = copy_query_dict(querydict, keys_to_copy)
 
-  return page, filter_params
+  return paginator, page, filter_params
 
 
 def _get_query_handle_and_state(query_history):
@@ -1030,7 +1035,7 @@ def _list_query_history(user, querydict, page_size, prefix=""):
   keys_to_copy = [ prefix + key for key in ('user', 'type', 'sort', 'design_id', 'auto_query', 'search') ]
   filter_params = copy_query_dict(querydict, keys_to_copy)
 
-  return page, filter_params
+  return paginator, page, filter_params
 
 
 def _update_query_state(query_history):
