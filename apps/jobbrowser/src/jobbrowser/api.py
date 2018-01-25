@@ -48,7 +48,7 @@ def get_api(user, jt):
 class JobBrowserApi(object):
 
   def paginate_task(self, task_list, pagenum):
-    paginator = Paginator(task_list, _DEFAULT_OBJ_PER_PAGINATION)
+    paginator = Paginator(task_list, _DEFAULT_OBJ_PER_PAGINATION, allow_empty_first_page=True)
     return paginator.page(pagenum)
 
 

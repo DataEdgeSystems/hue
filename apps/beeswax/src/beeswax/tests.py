@@ -871,16 +871,18 @@ for x in sys.stdin:
     # Retrieve that design. It's the first one since it's most recent
     design = beeswax.models.SavedQuery.objects.all()[0]
     resp = cli.get('/beeswax/execute/design/%s' % design.id)
-    assert_true('query' in resp.context, resp.context)
+    assert_true(len(resp.context), resp.context)
+    assert_true('query' in resp.context[0], resp.context)
     assert_true(resp.context[0]['query'] is None, resp.context)
     assert_equal(design, resp.context[0]['design'], resp.context)
 
     # Retrieve that query history. It's the first one since it's most recent
     query_history = beeswax.models.QueryHistory.objects.all()[0]
     resp = cli.get('/beeswax/execute/query/%s' % query_history.id)
-    assert_true('query' in resp.context, resp.context)
+    assert_true(len(resp.context), resp.context)
+    assert_true('query' in resp.context[0], resp.context)
     assert_true(resp.context[0]['query'] is not None, resp.context)
-    assert_true('design' in resp.context, resp.context)
+    assert_true('design' in resp.context[0], resp.context)
     assert_true(resp.context[0]['design'] is not None, resp.context)
 
     resp = cli.get(reverse('beeswax:api_fetch_saved_design', kwargs={'design_id': design.id}))

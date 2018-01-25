@@ -733,7 +733,7 @@ def make_parameterization_form(query_str):
   if len(variables) > 0:
     class Form(forms.Form):
       for name in sorted(variables):
-        locals()[name] = forms.CharField(required=True)
+        locals()[name] = forms.CharField(widget=forms.TextInput(attrs={'required': True}))
     return Form
   else:
     return None
@@ -856,8 +856,11 @@ def _list_designs(user, querydict, page_size, prefix="", is_trashed=False):
   designs = [job.content_object for job in db_queryset.all() if job.content_object and job.content_object.is_auto == False]
 
   pagenum = int(querydict.get(prefix + 'page', 1))
-  paginator = Paginator(designs, page_size)
-  page = paginator.page(pagenum)
+  paginator = Paginator(designs, page_size, allow_empty_first_page=True)
+  try:
+    page = paginator.page(pagenum)
+  except EmptyPage:
+    page = None
 
   # We need to pass the parameters back to the template to generate links
   keys_to_copy = [ prefix + key for key in ('user', 'type', 'sort', 'text') ]
@@ -1023,7 +1026,7 @@ def _list_query_history(user, querydict, page_size, prefix=""):
   if pagenum < 1:
     pagenum = 1
   db_queryset = db_queryset[ page_size * (pagenum - 1) : page_size * pagenum ]
-  paginator = Paginator(db_queryset, page_size)
+  paginator = Paginator(db_queryset, page_size, allow_empty_first_page=True)
   page = paginator.page(pagenum)
 
   # We do slicing ourselves, rather than letting the Paginator handle it, in order to
